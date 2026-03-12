@@ -75,10 +75,9 @@ export default function CajaPage() {
                 </span>
               </div>
 
-             <div className="text-xs text-slate-400 mt-1">
-              {new Date(pedido.created_at + 'Z').toLocaleTimeString('es-CR', { timeZone: 'America/Costa_Rica' })} · {pedido.items?.length} productos
-            </div>
-
+        <div className="text-xs text-slate-400 mt-1">
+          {new Date(pedido.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} · {pedido.items?.length} productos
+        </div>
               {/* Detalle expandido */}
               {pedidoAbierto === pedido.id && (
                 <div className="mt-4 border-t border-slate-700 pt-4">

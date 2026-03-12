@@ -5,7 +5,7 @@ export async function GET() {
   try {
     const pedidos = await pool.query(`
       SELECT
-        p.id, p.mesa, p.estado, p.total, p.created_at,
+        p.id, p.mesa, p.estado, p.total, p.created_at AT TIME ZONE 'UTC' AT TIME ZONE 'America/Costa_Rica' as created_at,
         json_agg(
           json_build_object(
             'id', pi.id,

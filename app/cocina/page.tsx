@@ -20,7 +20,7 @@ export default function CocinaPage() {
     const token = localStorage.getItem('token')
     const rol = localStorage.getItem('rol')
     if (!token) { window.location.href = '/login'; return }
-    if (rol !== 'caja') { window.location.href = '/login'; return } // cambiar a 'cocina' en cocina
+    if (rol !== 'cocina') { window.location.href = '/login'; return } // cambiar a 'cocina' en cocina
     cargarPedidos()
     const intervalo = setInterval(cargarPedidos, 5000)
     return () => clearInterval(intervalo)
@@ -56,7 +56,7 @@ export default function CocinaPage() {
               <div className="flex justify-between items-center mb-3">
                 <span className="font-bold text-xl">Mesa {pedido.mesa}</span>
                 <span className="text-xs text-slate-400">
-                  {new Date(pedido.created_at + 'Z').toLocaleTimeString('es-CR', { timeZone: 'America/Costa_Rica' })}
+                  {new Date(pedido.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </span>
               </div>
 
