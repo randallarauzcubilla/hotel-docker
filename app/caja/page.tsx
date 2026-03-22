@@ -17,15 +17,16 @@ export default function CajaPage() {
     setCargando(false)
   }
 
-    useEffect(() => {
-    const token = localStorage.getItem('token')
-    const rol = localStorage.getItem('rol')
-    if (!token) { window.location.href = '/login'; return }
-    if (rol !== 'caja') { window.location.href = '/login'; return } // cambiar a 'cocina' en cocina
-    cargarPedidos()
-    const intervalo = setInterval(cargarPedidos, 5000)
-    return () => clearInterval(intervalo)
-  }, [])
+  useEffect(() => {
+  const token = localStorage.getItem('token')
+  const rol = localStorage.getItem('rol')
+  if (!token) { window.location.href = '/login'; return }
+  if (rol !== 'caja') { window.location.href = '/login'; return }
+  cargarPedidos()
+  const intervalo = setInterval(cargarPedidos, 5000)
+  return () => clearInterval(intervalo)
+// eslint-disable-next-line react-hooks/exhaustive-deps
+}, [])
 
   const cobrar = async (id: number) => {
     await fetch(`/api/pedidos/${id}`, {
@@ -76,7 +77,12 @@ export default function CajaPage() {
               </div>
 
         <div className="text-xs text-slate-400 mt-1">
-          {new Date(pedido.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} · {pedido.items?.length} productos
+       {new Date(pedido.created_at).toLocaleTimeString('es-CR', {
+  hour: '2-digit',
+  minute: '2-digit',
+  hour12: true,
+  timeZone: 'America/Costa_Rica'
+})} · {pedido.items?.length} productos
         </div>
               {/* Detalle expandido */}
               {pedidoAbierto === pedido.id && (

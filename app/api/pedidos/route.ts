@@ -1,19 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server'
 import pool from '@/lib/db'
+import mysql from 'mysql2/promise'
 
 export async function GET() {
   try {
-    const pedidos = await pool.query(`
+    const [rows] = await pool.query(`
       SELECT
-        p.id, p.mesa, p.estado, p.total, p.created_at AT TIME ZONE 'UTC' AT TIME ZONE 'America/Costa_Rica' as created_at,
-        json_agg(
-          json_build_object(
+        p.id, p.mesa, p.estado, p.total,
+        p.created_at,
+        JSON_ARRAYAGG(
+          JSON_OBJECT(
             'id', pi.id,
             'cantidad', pi.cantidad,
             'precio_unitario', pi.precio_unitario,
-            'producto', json_build_object('id', pr.id, 'nombre', pr.nombre),
+            'producto', JSON_OBJECT('id', pr.id, 'nombre', pr.nombre),
             'adicionales', (
-              SELECT json_agg(json_build_object('nombre', a.nombre, 'precio', pia.precio_unitario))
+              SELECT JSON_ARRAYAGG(JSON_OBJECT('nombre', a.nombre, 'precio', pia.precio_unitario))
               FROM pedido_item_adicionales pia
               JOIN adicionales a ON pia.adicional_id = a.id
               WHERE pia.pedido_item_id = pi.id
@@ -27,7 +29,7 @@ export async function GET() {
       GROUP BY p.id
       ORDER BY p.created_at DESC
     `)
-    return NextResponse.json(pedidos.rows)
+    return NextResponse.json(rows)
   } catch (error) {
     console.error(error)
     return NextResponse.json({ error: 'Error del servidor' }, { status: 500 })
@@ -38,24 +40,26 @@ export async function POST(req: NextRequest) {
   try {
     const { mesa, items, total } = await req.json()
 
-    const pedido = await pool.query(
-      `INSERT INTO pedidos (mesa, total) VALUES ($1, $2) RETURNING id`,
-      [mesa, total]
-    )
-    const pedidoId = pedido.rows[0].id
+    const [pedido] = await pool.query(
+    `INSERT INTO pedidos (mesa, total) VALUES (?, ?)`,
+    [mesa, total]
+    ) as [mysql.ResultSetHeader, mysql.FieldPacket[]]
+
+    const pedidoId = pedido.insertId
 
     for (const item of items) {
-      const pedidoItem = await pool.query(
+      const [pedidoItem] = await pool.query(
         `INSERT INTO pedido_items (pedido_id, producto_id, cantidad, precio_unitario)
-         VALUES ($1, $2, $3, $4) RETURNING id`,
+        VALUES (?, ?, ?, ?)`,
         [pedidoId, item.producto.id, item.cantidad, item.producto.precio]
-      )
-      const itemId = pedidoItem.rows[0].id
+      ) as [mysql.ResultSetHeader, mysql.FieldPacket[]]
+
+      const itemId = pedidoItem.insertId
 
       for (const adicional of item.adicionales) {
         await pool.query(
           `INSERT INTO pedido_item_adicionales (pedido_item_id, adicional_id, precio_unitario)
-           VALUES ($1, $2, $3)`,
+           VALUES (?, ?, ?)`,
           [itemId, adicional.id, adicional.precio]
         )
       }

@@ -5,7 +5,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   try {
     const { id } = await params
     const { estado } = await req.json()
-    await pool.query(`UPDATE pedidos SET estado = $1 WHERE id = $2`, [estado, id])
+    await pool.query(`UPDATE pedidos SET estado = ? WHERE id = ?`, [estado, id])
     return NextResponse.json({ ok: true })
   } catch (error) {
     console.error(error)

@@ -2,20 +2,21 @@ import { NextRequest, NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import pool from '@/lib/db'
+import mysql from 'mysql2/promise'
 
 export async function POST(req: NextRequest) {
   try {
     const { email, password } = await req.json()
 
     // Buscar usuario con su rol
-    const result = await pool.query(`
-      SELECT u.*, r.nombre as rol
-      FROM usuarios u
-      JOIN roles r ON u.rol_id = r.id
-      WHERE u.email = $1 AND u.activo = true
-    `, [email])
+    const [rows] = await pool.query(`
+  SELECT u.*, r.nombre as rol
+  FROM usuarios u
+  JOIN roles r ON u.rol_id = r.id
+  WHERE u.email = ? AND u.activo = true
+`, [email]) as [Record<string, unknown>[], mysql.FieldPacket[]]
 
-    const usuario = result.rows[0]
+const usuario = rows[0]
 
     if (!usuario) {
       return NextResponse.json(
@@ -25,7 +26,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Verificar contraseña
-    const passwordValido = await bcrypt.compare(password, usuario.password)
+    const passwordValido = await bcrypt.compare(password, usuario.password as string)
 
     if (!passwordValido) {
       return NextResponse.json(

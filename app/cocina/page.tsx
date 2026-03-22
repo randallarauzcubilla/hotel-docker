@@ -16,15 +16,16 @@ export default function CocinaPage() {
     setCargando(false)
   }
 
-    useEffect(() => {
-    const token = localStorage.getItem('token')
-    const rol = localStorage.getItem('rol')
-    if (!token) { window.location.href = '/login'; return }
-    if (rol !== 'cocina') { window.location.href = '/login'; return } // cambiar a 'cocina' en cocina
-    cargarPedidos()
-    const intervalo = setInterval(cargarPedidos, 5000)
-    return () => clearInterval(intervalo)
-  }, [])
+  useEffect(() => {
+  const token = localStorage.getItem('token')
+  const rol = localStorage.getItem('rol')
+  if (!token) { window.location.href = '/login'; return }
+  if (rol !== 'cocina') { window.location.href = '/login'; return }
+  cargarPedidos()
+  const intervalo = setInterval(cargarPedidos, 5000)
+  return () => clearInterval(intervalo)
+// eslint-disable-next-line react-hooks/exhaustive-deps
+}, [])
 
   const marcarListo = async (id: number) => {
     await fetch(`/api/pedidos/${id}`, {
@@ -56,7 +57,12 @@ export default function CocinaPage() {
               <div className="flex justify-between items-center mb-3">
                 <span className="font-bold text-xl">Mesa {pedido.mesa}</span>
                 <span className="text-xs text-slate-400">
-                  {new Date(pedido.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                {new Date(pedido.created_at).toLocaleTimeString('es-CR', { 
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  hour12: true,
+                  timeZone: 'America/Costa_Rica'
+                })}
                 </span>
               </div>
 

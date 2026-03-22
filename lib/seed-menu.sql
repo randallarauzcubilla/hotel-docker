@@ -1,3 +1,5 @@
+SET NAMES utf8mb4;
+SET CHARACTER SET utf8mb4;
 -- CATEGORÍAS
 INSERT INTO categorias (nombre, tiene_adicionales, orden) VALUES
   ('Desayuno', true, 1),
@@ -168,17 +170,17 @@ INSERT INTO adicionales (nombre, precio) VALUES
 
 -- VINCULAR ADICIONALES A CATEGORÍAS
 INSERT INTO categoria_adicionales (categoria_id, adicional_id)
-SELECT 1, id FROM adicionales 
+SELECT 1, id FROM adicionales
 WHERE nombre IN ('Salchichón','Natilla','Queso','Ord. de Huevos','Carne en Salsa','Pollo en Salsa','Carne Mexicana','Bisteck','Chuleta','Ord. de Pinto','Ord. de Pan','Ord. de Maduros');
 
 INSERT INTO categoria_adicionales (categoria_id, adicional_id)
-SELECT 2, id FROM adicionales 
+SELECT 2, id FROM adicionales
 WHERE nombre IN ('Ord. Carne en Salsa','Ord. Pollo en Salsa','Ord. Carne Mexicana','Filete de Pescado','Filete de Pollo','Ord. Costillas','Lengua en Salsa','Ord. de Frijoles','Ord. Ensalada Fría o Picadillo','Ord. de Arroz','Ord. de Maduros Almuerzo');
 
 INSERT INTO categoria_adicionales (categoria_id, adicional_id)
-SELECT 5, id FROM adicionales 
+SELECT 5, id FROM adicionales
 WHERE nombre IN ('Extra de Hongos','Ord. de Pan Pasta','Extra de Queso');
 
 INSERT INTO categoria_adicionales (categoria_id, adicional_id)
-SELECT 6, id FROM adicionales 
+SELECT 6, id FROM adicionales
 WHERE nombre IN ('Ord. de Arroz Blanco');
