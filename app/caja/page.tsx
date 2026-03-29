@@ -17,16 +17,26 @@ export default function CajaPage() {
     setCargando(false)
   }
 
-  useEffect(() => {
-  const token = localStorage.getItem('token')
-  const rol = localStorage.getItem('rol')
-  if (!token) { window.location.href = '/login'; return }
-  if (rol !== 'caja') { window.location.href = '/login'; return }
-  cargarPedidos()
-  const intervalo = setInterval(cargarPedidos, 5000)
-  return () => clearInterval(intervalo)
-// eslint-disable-next-line react-hooks/exhaustive-deps
-}, [])
+    useEffect(() => {
+    const token = localStorage.getItem('token')
+    const rol = localStorage.getItem('rol')
+    if (!token) { window.location.href = '/login'; return }
+    if (rol !== 'caja') { window.location.href = '/login'; return } // cocina en cocina
+
+    cargarPedidos()
+
+    let socketInstance: ReturnType<typeof import('socket.io-client').io> | null = null
+
+    import('socket.io-client').then(({ io }) => {
+      socketInstance = io(window.location.origin)
+      socketInstance.on('actualizar_pedidos', cargarPedidos)
+    })
+
+    return () => {
+      socketInstance?.disconnect()
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const cobrar = async (id: number) => {
     await fetch(`/api/pedidos/${id}`, {

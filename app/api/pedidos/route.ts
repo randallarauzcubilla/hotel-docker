@@ -2,6 +2,11 @@ import { NextRequest, NextResponse } from 'next/server'
 import pool from '@/lib/db'
 import mysql from 'mysql2/promise'
 
+declare global {
+  // eslint-disable-next-line no-var
+  var io: import('socket.io').Server | undefined
+}
+
 export async function GET() {
   try {
     const [rows] = await pool.query(`
@@ -27,7 +32,7 @@ export async function GET() {
       JOIN productos pr ON pi.producto_id = pr.id
       WHERE p.estado != 'listo'
       GROUP BY p.id
-      ORDER BY p.created_at DESC
+      ORDER BY p.created_at ASC
     `)
     return NextResponse.json(rows)
   } catch (error) {
@@ -41,8 +46,8 @@ export async function POST(req: NextRequest) {
     const { mesa, items, total } = await req.json()
 
     const [pedido] = await pool.query(
-    `INSERT INTO pedidos (mesa, total) VALUES (?, ?)`,
-    [mesa, total]
+      `INSERT INTO pedidos (mesa, total) VALUES (?, ?)`,
+      [mesa, total]
     ) as [mysql.ResultSetHeader, mysql.FieldPacket[]]
 
     const pedidoId = pedido.insertId
@@ -63,6 +68,11 @@ export async function POST(req: NextRequest) {
           [itemId, adicional.id, adicional.precio]
         )
       }
+    }
+
+    // Avisar a caja que llegó pedido nuevo ✅
+    if (global.io) {
+      global.io.emit('actualizar_pedidos')
     }
 
     return NextResponse.json({ id: pedidoId })
